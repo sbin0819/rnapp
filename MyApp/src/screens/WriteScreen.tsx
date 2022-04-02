@@ -20,7 +20,7 @@ function WriteScreen({route}: {route: any}) {
     if (log) {
       onModify({
         id: log.id,
-        date: log.date,
+        date: date.toISOString(),
         title,
         body,
       });
@@ -64,6 +64,8 @@ function WriteScreen({route}: {route: any}) {
           onSave={onSave}
           onAskRemove={onAskRemove}
           isEditing={!!log}
+          date={date}
+          onChangeDate={setDate}
         />
         <WriteEditor
           title={title}
