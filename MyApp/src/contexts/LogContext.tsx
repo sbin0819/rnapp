@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {createContext, useState} from 'react';
 import {nanoid} from 'nanoid';
+import logsStorage from '../storages/logsStorage';
 
 type State = {
   logs: any[];
@@ -13,6 +14,7 @@ type State = {
 const LogContext = createContext<State>({logs: []});
 
 export function LogContextProvider({children}: {children: any}) {
+  const initialLogsRef = useRef(null);
   const [logs, setLogs] = useState<any[]>(
     Array.from({length: 10})
       .map((_, idx) => ({
@@ -51,6 +53,22 @@ export function LogContextProvider({children}: {children: any}) {
     const nextLogs = logs.filter(log => log.id !== id);
     setLogs(nextLogs);
   };
+
+  useEffect(() => {
+    (async () => {
+      const savedLogs = await logsStorage.get();
+      if (savedLogs) {
+        initialLogsRef.current = savedLogs;
+        setLogs(savedLogs);
+      }
+    })();
+  }, []);
+  useEffect(() => {
+    if (logs === initialLogsRef.current) {
+      return;
+    }
+    logsStorage.set(logs);
+  }, [logs]);
 
   return (
     <LogContext.Provider value={{logs, onCreate, onModify, onRemove}}>
